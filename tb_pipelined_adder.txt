@@ -1,0 +1,122 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date:
+-- Design Name: 
+-- Module Name: tb_pipelined_adder - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_pipelined_adder is
+--  Port ( );
+end tb_pipelined_adder;
+
+architecture Behavioral of tb_pipelined_adder is
+component pipelined_adder is
+    generic(N :integer := 6); --4 bit pipelined adder (change accordingly)
+    Port ( A  : in STD_LOGIC_VECTOR (N-1 downto 0);
+           B  : in STD_LOGIC_VECTOR (N-1 downto 0);
+           Ci : in STD_LOGIC;
+           S  : out STD_LOGIC_VECTOR (N-1 downto 0);
+           Co : out STD_LOGIC;
+           CLK, RSTn : in STD_LOGIC );
+end component;
+
+   signal A,B : std_logic_vector (5 downto 0):="000000";
+   signal Ci  : std_logic := '0';
+   signal clk : std_logic := '0';
+   signal rstn : std_logic := '1';
+   signal Sum : std_logic_vector (5 downto 0);
+   signal Co  : std_logic;
+   
+   signal Result: std_logic_vector (6 downto 0);
+   
+constant clk_period : time := 50 ns;  -- Input the minimum clk period to obtain correct pipeline adder results
+
+begin
+
+UTT: pipelined_adder generic map(N=>6) port map(A,B,Ci,Sum,Co,clk,rstn);
+
+clk_process :process
+                  begin
+                      clk <= '0';
+                      wait for clk_period/2;
+                      clk <= '1';
+                  wait for clk_period/2;
+              end process;
+  
+stim_proc: process
+              begin  
+            
+                  rstn <= '1';
+                  wait for 120 ns; 
+                
+                  rstn <= '0';
+                  A <= "000111"; --7
+                  B <= "011110"; --30
+                  Ci<= '0';
+                  wait for 120 ns;
+                  
+                  rstn <= '0';
+                  A <= "000111"; --7
+                  B <= "011110"; --30
+                  Ci<= '1';
+                  wait for 120 ns;
+                  
+                  rstn <= '0';
+                  A <= "000111"; --7
+                  B <= "111111"; --63
+                  Ci<= '0';
+                  wait for 120 ns;
+                  
+                  rstn <= '0';
+                  A <= "000111"; --7
+                  B <= "111111"; --63
+                  Ci<= '1';
+                  wait for 120 ns;
+				  
+		  rstn <= '0';
+                  A <= "111110"; --62
+                  B <= "011110"; --30
+                  Ci<= '0';
+                  wait for 120 ns;
+                  
+                  rstn <= '0';
+                  A <= "111110"; --62
+                  B <= "011110"; --30
+                  Ci<= '1';
+                  wait for 120 ns;
+                  
+                  rstn <= '0';
+                  A <= "111110"; --62
+                  B <= "111111"; --63
+                  Ci<= '0';
+                  wait for 120 ns;
+                  
+                  rstn <= '0';
+                  A <= "111110"; --62
+                  B <= "111111"; --63
+                  Ci<= '1';
+                  wait for 120 ns;
+                  
+              end process;
+          
+
+Result <= (Co & Sum);
+
+end Behavioral;

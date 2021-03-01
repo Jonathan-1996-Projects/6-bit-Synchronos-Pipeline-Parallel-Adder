@@ -1,0 +1,150 @@
+----------------------------------------------------------------------------------
+---REGISTER
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity REG is
+    port(D, CLK, RSTn: in std_logic;  
+         Q: out std_logic);
+end entity;
+
+architecture behaviour of REG is 
+
+begin
+
+process(CLK)
+    begin
+        if (CLK'EVENT AND CLK = '1') then
+            if(RSTn = '1') then
+                Q <= '0' AFTER 5 ns;
+               else
+                Q <= D AFTER 5 ns;
+            end if;
+        end if;
+    end process;
+
+end architecture;
+
+----------------------------------------------------------------------------------
+---FULL ADDER
+library ieee;
+use ieee.std_logic_1164.all;
+ 
+entity FA is
+    port (A, B, Ci: IN STD_LOGIC ;
+          S, Co: OUT STD_LOGIC ) ;
+end entity;
+ 
+architecture behaviour of FA is
+    begin
+        S  <= A XOR B XOR Ci AFTER 10 ns;
+        Co <= (A AND B) OR (Ci AND A) OR (Ci AND B) AFTER 15 ns; 
+end architecture;
+
+----------------------------------------------------------------------------------
+---PIPELINED ADDER
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity pipelined_adder is
+    generic(N :integer := 6); --4 bit pipelined adder is given here (change accordingly for 6 bit)
+    Port ( A  : in STD_LOGIC_VECTOR (N-1 downto 0);
+           B  : in STD_LOGIC_VECTOR (N-1 downto 0);
+           Ci : in STD_LOGIC;
+           S  : out STD_LOGIC_VECTOR (N-1 downto 0);
+           Co : out STD_LOGIC;
+           CLK, RSTn : in STD_LOGIC );
+end pipelined_adder;
+
+architecture Behavioral of pipelined_adder is
+
+--- component declaration
+
+component FA 
+    PORT (A, B, Ci: IN STD_LOGIC ;  
+          S, Co: OUT STD_LOGIC ) ; 
+end component; 
+ 
+component REG 
+    port(D, CLK, RSTn: in std_logic;  
+         Q: out std_logic); 
+end component;
+
+--- signal declaration
+
+signal tmp_cout : std_logic_vector(5 downto 0);
+signal tmp_cin  : std_logic_vector(5 downto 1);
+
+signal tmp_S0   : std_logic_vector(1 downto 0);
+signal tmp_S1   : std_logic_vector(1 downto 0);
+signal tmp_S2   : std_logic_vector(1 downto 0);
+signal tmp_S3   : std_logic;
+signal tmp_S4   : std_logic;
+signal tmp_S5   : std_logic;
+
+signal tmp_A3 : std_logic;
+signal tmp_B3 : std_logic;
+signal tmp_A4 : std_logic;
+signal tmp_B4 : std_logic;
+signal tmp_A5 : std_logic;
+signal tmp_B5 : std_logic;
+
+--- add necessary signals here
+
+begin
+
+--- 1st Full Adder
+
+FA_0    : FA port map(A(0), B(0), Ci, tmp_S0(0), tmp_cout(0));
+
+reg_s0_0: REG port map(tmp_S0(0), CLK, RSTn, tmp_S0(1));  
+reg_s0_1: REG port map(tmp_S0(1), CLK, RSTn, S(0)); 
+
+--- 2nd Full Adder
+
+FA_1    : FA port map(A(1), B(1), tmp_cout(0), tmp_S1(0), tmp_cout(1));
+
+reg_s1_0: REG port map(tmp_S1(0), CLK, RSTn, tmp_S1(1)); 
+reg_s1_1: REG port map(tmp_S1(1), CLK, RSTn, S(1)); 
+
+---3rd Full Adder
+
+FA_2    : FA port map(A(2), B(2), tmp_cout(1), tmp_S2(0), tmp_cout(2));
+
+reg_s2_0: REG port map(tmp_S2(0), CLK, RSTn, tmp_S2(1)); 
+reg_s2_1: REG port map(tmp_S2(1), CLK, RSTn, S(2)); 
+
+
+reg_cou1: REG port map(tmp_cout(2), CLK, RSTn, tmp_cin(1));
+
+--- 4th Full Adder
+
+reg_A3_0: REG port map(A(3), CLK, RSTn, tmp_A3);
+reg_B3_0: REG port map(B(3), CLK, RSTn, tmp_B3);
+
+FA_3: FA port map(tmp_A3, tmp_B3, tmp_cin(1), tmp_S3, tmp_cout(3));
+
+reg_s3_0: REG port map(tmp_S3, CLK, RSTn, S(3)); 
+
+--- 5th Full Adder
+
+reg_A4_0: REG port map(A(4), CLK, RSTn, tmp_A4);
+reg_B4_0: REG port map(B(4), CLK, RSTn, tmp_B4);
+
+FA_4: FA port map(tmp_A4, tmp_B4, tmp_cout(3), tmp_S4, tmp_cout(4));
+
+reg_s4_0: REG port map(tmp_S4, CLK, RSTn, S(4)); 
+
+--- 6th Full Adder
+
+reg_A5_0: REG port map(A(5), CLK, RSTn, tmp_A5);
+reg_B5_0: REG port map(B(5), CLK, RSTn, tmp_B5);
+
+FA_5: FA port map(tmp_A5, tmp_B5, tmp_cout(4), tmp_S5, tmp_cout(5));
+
+reg_s5_0: REG port map(tmp_S5, CLK, RSTn, S(5)); 
+
+reg_cou2: REG port map(tmp_cout(5), CLK, RSTn, Co);
+
+
+end Behavioral;
