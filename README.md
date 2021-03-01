@@ -1,1 +1,2 @@
-# 6-bit-Synchronos-Pipeline-Parallel-Adder
+The PDF document "Project summer 2020"  shows the instructions provided for the project. VHDL code for a 4-bit synchronous pipeline parallel adder was pre-written and supplied by the professor. Changes were made to implement both a 2-pipeline and 6-pipeline parallel adder. Timing analysis and testing is shown in the "FinalProjectReport" PDF. Project was created, modified, and executed using Xilinx Vivado.
+The .zip file contains the same files provided as well as the executable project formatted for the 2-bit design.
